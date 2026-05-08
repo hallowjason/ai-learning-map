@@ -165,15 +165,19 @@ function CopyablePre({ children, ...rest }: React.HTMLAttributes<HTMLPreElement>
   }
 
   return (
-    <div className="relative group">
+    <div className="copyable-pre">
+      <div className="copyable-pre__bar">
+        <span className="copyable-pre__label">提示詞 — 複製到 Codex / Claude 對話框</span>
+        <button
+          onClick={copy}
+          className="copyable-pre__btn"
+          type="button"
+          aria-label="複製到剪貼簿"
+        >
+          {copied ? "✓ 已複製" : "📋 複製"}
+        </button>
+      </div>
       <pre {...rest}>{children}</pre>
-      <button
-        onClick={copy}
-        className="absolute top-2 right-2 px-2.5 py-1 rounded-md text-xs bg-cream/15 hover:bg-cream/25 text-cream transition-opacity opacity-0 group-hover:opacity-100"
-        type="button"
-      >
-        {copied ? "已複製" : "複製"}
-      </button>
     </div>
   );
 }
