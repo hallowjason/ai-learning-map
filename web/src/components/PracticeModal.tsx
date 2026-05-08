@@ -8,11 +8,19 @@ import type { Practice } from "@/lib/types";
 interface PracticeModalProps {
   practice: Practice;
   done: boolean;
+  /** Preview-only mode (e.g. admin view) — hides the "complete" footer entirely. */
+  previewOnly?: boolean;
   onClose: () => void;
   onComplete: () => Promise<void> | void;
 }
 
-export default function PracticeModal({ practice, done, onClose, onComplete }: PracticeModalProps) {
+export default function PracticeModal({
+  practice,
+  done,
+  previewOnly = false,
+  onClose,
+  onComplete,
+}: PracticeModalProps) {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -76,6 +84,7 @@ export default function PracticeModal({ practice, done, onClose, onComplete }: P
           </ReactMarkdown>
         </div>
 
+        {!previewOnly && (
         <div
           className="px-7 py-4 border-t flex items-center justify-between bg-cream"
           style={{ borderColor: "var(--color-border)" }}
@@ -98,6 +107,7 @@ export default function PracticeModal({ practice, done, onClose, onComplete }: P
             {done ? "已完成 🪷" : submitting ? "記錄中…" : "我完成了 🪷"}
           </button>
         </div>
+        )}
       </div>
     </div>
   );
