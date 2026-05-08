@@ -1,7 +1,7 @@
-# Session Context — 2026-05-07 23:51
+# Session Context — 2026-05-08 09:13
 
 ## 專案路徑
-/Users/gooo/Desktop/.claude/projects/ai-learning-map/web (branch: main)
+/Users/gooo/Desktop/.claude/projects/ai-learning-map (branch: main)
 
 ## 最近 5 個 commits
 18c7e81 feat: initial AI learning map app
@@ -12,6 +12,6 @@
 
 ## 下次繼續的指令
 ```
-cd /Users/gooo/Desktop/.claude/projects/ai-learning-map/web
+cd /Users/gooo/Desktop/.claude/projects/ai-learning-map
 # 閱讀此檔案後說：「繼續上次的工作」
 ```

@@ -21,7 +21,8 @@ export async function loadCourse(): Promise<Practice[]> {
     md = await res.text();
   } else {
     // Local fallback for dev / when env var isn't set
-    const res = await fetch('/' + COURSE_FILENAME);
+    const prefix = process.env.NEXT_PUBLIC_BASE_PATH || '';
+    const res = await fetch(`${prefix}/${encodeURIComponent(COURSE_FILENAME)}`);
     if (!res.ok) throw new Error('Local course markdown not found at /' + COURSE_FILENAME);
     md = await res.text();
   }
