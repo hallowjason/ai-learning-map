@@ -4,10 +4,10 @@ export { ZONE_PAIR_IMAGES } from './types';
 
 // Practice → Zone mapping (md original order)
 export const ZONE_PRACTICES: Record<ZoneId, string[]> = {
-  1: ['0', '1', '2'],         // Lesson 1 上半 — 建立信心
-  2: ['3', '4a'],             // Lesson 1 下半 — 建立習慣
-  3: ['7', '5', '6'],         // Lesson 2 上半 — 擴展能力
-  4: ['8', '9', '4b'],        // Lesson 2 下半 — 個人化
+  1: ['0', '1', '2'],   // Lesson 1 上半 — 建立信心
+  2: ['3', '4'],        // Lesson 1 下半 — 建立習慣
+  3: ['5', '6'],        // Lesson 2 上半 — 擴展能力
+  4: ['7', '8'],        // Lesson 2 下半 — 個人化
 };
 
 // Cluster coords are normalized 0..1 within the zone's HALF of the paired image.
