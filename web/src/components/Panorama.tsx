@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Nameplate from "./Nameplate";
 import { ZONES } from "@/lib/zones";
+import { assetPath } from "@/lib/assetPath";
 import type { UserRow, ZoneId } from "@/lib/types";
 
 interface PanoramaProps {
@@ -25,7 +26,7 @@ export default function Panorama({ users, myName, myZone }: PanoramaProps) {
     <div className="relative w-full overflow-hidden rounded-2xl shadow-lg bg-cream"
          style={{ aspectRatio: "3520 / 1024" }}>
       <Image
-        src="/assets/panorama.png"
+        src={assetPath("/assets/panorama.png")}
         alt="AI 學習地圖全景"
         fill
         sizes="100vw"

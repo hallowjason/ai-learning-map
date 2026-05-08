@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { signInByName } from "@/lib/progress";
+import { assetPath } from "@/lib/assetPath";
 
 const STORAGE_KEY = "ai-learning-map.userName";
 
@@ -43,7 +44,7 @@ export default function Landing() {
       <div className="grid w-full max-w-5xl gap-10 md:grid-cols-2 items-center">
         <div className="relative aspect-square w-full max-w-md mx-auto rounded-2xl overflow-hidden shadow-lg">
           <Image
-            src="/assets/zone1.png"
+            src={assetPath("/assets/zone1.png")}
             alt="起點村莊"
             fill
             sizes="(max-width: 768px) 90vw, 40vw"
