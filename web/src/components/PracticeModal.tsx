@@ -40,24 +40,31 @@ export default function PracticeModal({ practice, done, onClose, onComplete }: P
       onClick={onClose}
     >
       <div
-        className="relative bg-cream rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+        className="relative bg-cream rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col border"
         onClick={(e) => e.stopPropagation()}
+        style={{
+          borderColor: "var(--color-border)",
+          boxShadow: "rgba(0,0,0,0.18) 0 16px 48px",
+        }}
       >
-        <div className="flex items-start justify-between px-7 py-5 border-b border-ink/10">
+        <div
+          className="flex items-start justify-between px-7 py-5 border-b"
+          style={{ borderColor: "var(--color-border)" }}
+        >
           <div>
-            <p className="text-xs uppercase tracking-wider text-coral font-semibold">練習 {practice.id}</p>
-            <h2 className="font-display text-2xl font-bold text-ink mt-1">{practice.title}</h2>
+            <p className="text-xs uppercase tracking-wider text-coral font-medium">練習 {practice.id}</p>
+            <h2 className="font-display text-2xl font-semibold text-ink mt-1 tracking-tight">{practice.title}</h2>
           </div>
           <button
             onClick={onClose}
-            className="text-ink/50 hover:text-ink text-2xl leading-none p-1"
+            className="text-ink-soft hover:text-ink text-2xl leading-none p-1"
             aria-label="關閉"
           >
             ×
           </button>
         </div>
 
-        <div className="markdown-body overflow-y-auto px-7 py-6 flex-1 text-ink/90">
+        <div className="markdown-body overflow-y-auto px-7 py-6 flex-1 text-ink">
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
             components={{
@@ -69,20 +76,24 @@ export default function PracticeModal({ practice, done, onClose, onComplete }: P
           </ReactMarkdown>
         </div>
 
-        <div className="px-7 py-4 border-t border-ink/10 flex items-center justify-between bg-cream/80">
-          <p className="text-sm text-ink/60">
+        <div
+          className="px-7 py-4 border-t flex items-center justify-between bg-cream"
+          style={{ borderColor: "var(--color-border)" }}
+        >
+          <p className="text-sm text-ink-soft">
             {done ? "✓ 你已完成這個練習" : "完成後點下方按鈕，蓮花會綻放在你的名字旁"}
           </p>
           <button
             onClick={handleComplete}
             disabled={done || submitting}
-            className={`px-5 py-2.5 rounded-xl font-medium transition-colors
+            className={`px-4 py-2 rounded-md font-normal text-base transition
               ${done
-                ? "bg-fresh/40 text-ink/60 cursor-default"
-                : "bg-ink text-cream hover:bg-forest"
+                ? "bg-cream text-ink-soft cursor-default"
+                : "bg-ink text-cream hover:opacity-90 active:opacity-80 btn-inset"
               }
               disabled:opacity-50
             `}
+            style={done ? { border: "1px solid var(--color-border)" } : undefined}
           >
             {done ? "已完成 🪷" : submitting ? "記錄中…" : "我完成了 🪷"}
           </button>

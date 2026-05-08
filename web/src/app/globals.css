@@ -1,20 +1,34 @@
 @import "tailwindcss";
 
+/* ───────── creamfont (local) ───────── */
+@font-face {
+  font-family: "Cream";
+  src: url("/fonts/creamfont.otf") format("opentype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme {
-  /* Palette — locked from /draw map design */
-  --color-cream: #FAF5E8;
+  /* Lovable palette — warm cream + charcoal */
+  --color-cream: #f7f4ed;
+  --color-paper: #f7f4ed;
+  --color-ink: #1c1c1c;
+  --color-ink-soft: #5f5f5d;
+  --color-border: #eceae4;
+  --color-border-strong: rgba(28, 28, 28, 0.4);
+
+  /* Map illustration accents (used inside the map illustration) */
   --color-meadow: #F2D55A;
   --color-fresh: #A9D08E;
   --color-forest: #4F8341;
   --color-sky: #A9D8E8;
-  --color-coral: #E78B7A;
+  --color-coral: #E78B7A;          /* personal accent — me */
   --color-mountain: #8C7AB6;
-  --color-ink: #2C3E50;
-  --color-paper: #FAF5E8;
 
-  /* Typography */
-  --font-sans: var(--font-noto-sans), "PingFang TC", "Heiti TC", sans-serif;
-  --font-display: var(--font-noto-serif), "Noto Serif TC", serif;
+  /* Typography — creamfont primary, Noto fallback for CJK */
+  --font-sans: "Cream", var(--font-noto-sans), "PingFang TC", "Heiti TC", sans-serif;
+  --font-display: "Cream", var(--font-noto-serif), "Noto Serif TC", serif;
   --font-mono: var(--font-mono-jp), "Menlo", "Monaco", monospace;
 }
 
@@ -31,35 +45,69 @@ html, body {
 
 h1, h2, h3, h4 {
   text-wrap: balance;
+  letter-spacing: -0.02em;
 }
 
-/* Subtle drift animation for floating nameplates */
+/* ───────── Drift animation (floating nameplates) ───────── */
 @keyframes drift {
   0%, 100% { transform: translate(0, 0); }
   25%      { transform: translate(2px, -3px); }
   50%      { transform: translate(-3px, 2px); }
   75%      { transform: translate(1px, 3px); }
 }
-
-.drift {
-  animation: drift 6s ease-in-out infinite;
-}
+.drift { animation: drift 6s ease-in-out infinite; }
 .drift-slow { animation-duration: 9s; }
 .drift-fast { animation-duration: 4s; }
 
-/* Vertical name writing */
+/* ───────── Vertical Chinese name ───────── */
 .vertical-name {
   writing-mode: vertical-rl;
   text-orientation: upright;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
 }
 
-/* Markdown content inside cards — basic typography */
+/* ───────── Nameplate outside-stroke (black text, white outer frame) ───────── */
+/* `paint-order: stroke fill` — stroke painted first, then black fill covers
+   the inner half. Only the outer half of the white stroke remains visible. */
+.name-stroke {
+  color: #1c1c1c;
+  font-weight: 700;
+  -webkit-text-stroke: 3px #ffffff;
+  paint-order: stroke fill;
+}
+.name-stroke-me {
+  color: #1c1c1c;
+  font-weight: 900;
+  -webkit-text-stroke: 4px #ffffff;
+  paint-order: stroke fill;
+  filter:
+    drop-shadow(0 0 4px rgba(231, 139, 122, 0.95))
+    drop-shadow(0 0 10px rgba(231, 139, 122, 0.55));
+}
+/* Pointer: solid dark triangle, no outline. Soft shadow keeps it readable. */
+.name-pointer {
+  color: #1c1c1c;
+  filter: drop-shadow(0 1px 1.5px rgba(255, 255, 255, 0.85));
+}
+.name-pointer-me {
+  color: #1c1c1c;
+  filter: drop-shadow(0 1px 2px rgba(231, 139, 122, 0.9));
+}
+
+/* ───────── Lovable inset shadow on dark buttons ───────── */
+.btn-inset {
+  box-shadow:
+    rgba(255, 255, 255, 0.2) 0 0.5px 0 0 inset,
+    rgba(0, 0, 0, 0.2) 0 0 0 0.5px inset,
+    rgba(0, 0, 0, 0.05) 0 1px 2px 0;
+}
+
+/* ───────── Markdown body ───────── */
 .markdown-body p { margin: 0.5em 0; line-height: 1.7; }
 .markdown-body ul, .markdown-body ol { padding-left: 1.5em; margin: 0.5em 0; }
 .markdown-body li { margin: 0.25em 0; }
 .markdown-body code {
-  background: rgba(44, 62, 80, 0.08);
+  background: rgba(28, 28, 28, 0.06);
   padding: 0.1em 0.4em;
   border-radius: 4px;
   font-family: var(--font-mono);
@@ -77,23 +125,17 @@ h1, h2, h3, h4 {
   line-height: 1.6;
   position: relative;
 }
-.markdown-body pre code {
-  background: transparent;
-  padding: 0;
-  color: inherit;
-}
+.markdown-body pre code { background: transparent; padding: 0; color: inherit; }
 .markdown-body blockquote {
-  border-left: 4px solid var(--color-mountain);
+  border-left: 3px solid var(--color-border-strong);
   padding: 0.6em 1em;
   margin: 0.8em 0;
-  background: rgba(140, 122, 182, 0.08);
+  background: rgba(28, 28, 28, 0.03);
   border-radius: 0 8px 8px 0;
-}
-.markdown-body blockquote p:first-child::before {
-  content: '';
+  color: var(--color-ink-soft);
 }
 .markdown-body a {
-  color: var(--color-forest);
+  color: var(--color-ink);
   text-decoration: underline;
   text-underline-offset: 3px;
 }

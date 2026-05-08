@@ -32,3 +32,6 @@ yarn-error.log*
 
 # Drafts (keep final assets only)
 assets/drafts/
+
+# Claude Code worktrees
+.claude/

@@ -42,7 +42,10 @@ export default function Landing() {
   return (
     <div className="min-h-screen flex items-center justify-center px-6 py-12 bg-cream">
       <div className="grid w-full max-w-5xl gap-10 md:grid-cols-2 items-center">
-        <div className="relative aspect-square w-full max-w-md mx-auto rounded-2xl overflow-hidden shadow-lg">
+        <div
+          className="relative aspect-square w-full max-w-md mx-auto rounded-2xl overflow-hidden border"
+          style={{ borderColor: "var(--color-border)" }}
+        >
           <Image
             src={assetPath("/assets/zone1.png")}
             alt="起點村莊"
@@ -54,13 +57,16 @@ export default function Landing() {
         </div>
 
         <div className="space-y-6">
-          <div className="space-y-2">
+          <div className="space-y-3">
             <p className="text-coral font-medium tracking-wider text-sm uppercase">AI Learning Map</p>
-            <h1 className="font-display text-4xl md:text-5xl font-bold text-ink leading-tight">
+            <h1
+              className="font-display text-5xl md:text-6xl font-semibold text-ink leading-[1.05]"
+              style={{ letterSpacing: "-0.04em" }}
+            >
               你的 AI 學習旅程<br/>
               從村莊出發
             </h1>
-            <p className="text-ink/70 leading-relaxed">
+            <p className="text-ink-soft leading-relaxed">
               填上你的名字，加入這趟從基礎到進階的 AI 練習旅程。
               每完成一階段練習，蓮花會綻放在你的名字旁，集滿就能上山。
             </p>
@@ -68,14 +74,17 @@ export default function Landing() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <label className="block">
-              <span className="text-sm text-ink/70 mb-1 block">你的名字</span>
+              <span className="text-sm text-ink-soft mb-1.5 block">你的名字</span>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="例如：王小明"
                 maxLength={20}
-                className="w-full px-4 py-3 rounded-xl border-2 border-ink/15 bg-white text-ink text-lg focus:border-forest focus:outline-none transition-colors"
+                className="w-full px-4 py-3 rounded-md border bg-cream text-ink text-lg focus:outline-none transition"
+                style={{ borderColor: "var(--color-border)" }}
+                onFocus={(e) => (e.currentTarget.style.borderColor = "var(--color-border-strong)")}
+                onBlur={(e) => (e.currentTarget.style.borderColor = "var(--color-border)")}
                 autoFocus
               />
             </label>
@@ -83,13 +92,13 @@ export default function Landing() {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full px-6 py-3 rounded-xl bg-ink text-cream text-lg font-medium hover:bg-forest transition-colors disabled:opacity-50"
+              className="w-full px-6 py-3 rounded-md bg-ink text-cream text-base font-normal hover:opacity-90 active:opacity-80 transition btn-inset disabled:opacity-50"
             >
               {submitting ? "進入中…" : "進入地圖 →"}
             </button>
           </form>
 
-          <p className="text-xs text-ink/50">
+          <p className="text-xs text-ink-soft">
             名字會公開顯示在地圖上，讓夥伴看見你的位置。
           </p>
         </div>

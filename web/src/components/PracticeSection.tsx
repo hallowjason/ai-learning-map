@@ -24,17 +24,17 @@ export default function PracticeSection({
   const doneCount = practices.filter((p) => completed.includes(p.id)).length;
 
   return (
-    <section className="mt-8">
+    <section className="mt-10">
       <div className="flex items-end justify-between mb-4">
         <div>
-          <p className="text-xs uppercase tracking-wider text-coral font-semibold">
+          <p className="text-xs uppercase tracking-wider text-coral font-medium">
             你的當前任務
           </p>
-          <h2 className="font-display text-2xl font-bold text-ink">
+          <h2 className="font-display text-2xl font-semibold text-ink tracking-tight">
             {zone.title}・{zone.subtitle}
           </h2>
         </div>
-        <p className="text-sm text-ink/60">
+        <p className="text-sm text-ink-soft">
           {doneCount} / {practices.length} 完成
         </p>
       </div>
@@ -46,23 +46,22 @@ export default function PracticeSection({
             <button
               key={p.id}
               onClick={() => setOpenId(p.id)}
-              className={`text-left p-5 rounded-2xl border-2 transition-all hover:shadow-md hover:-translate-y-0.5
-                ${done
-                  ? "border-fresh bg-fresh/15"
-                  : "border-ink/15 bg-white hover:border-coral"
-                }
-              `}
+              className="text-left p-5 rounded-xl border bg-cream transition-all hover:-translate-y-0.5"
+              style={{
+                borderColor: done ? "var(--color-coral)" : "var(--color-border)",
+                boxShadow: done ? "rgba(231,139,122,0.15) 0 4px 12px" : undefined,
+              }}
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs uppercase tracking-wider text-coral font-semibold">
+                <span className="text-xs uppercase tracking-wider text-coral font-medium">
                   練習 {p.id}
                 </span>
                 {done && <span className="text-lg" aria-label="已完成">🪷</span>}
               </div>
-              <h3 className="font-display text-lg font-bold text-ink leading-tight mb-1">
+              <h3 className="font-display text-lg font-semibold text-ink leading-tight mb-1 tracking-tight">
                 {p.title}
               </h3>
-              <p className="text-sm text-ink/60">
+              <p className="text-sm text-ink-soft">
                 {done ? "已完成 — 點擊回顧步驟" : "點擊查看完整步驟"}
               </p>
             </button>

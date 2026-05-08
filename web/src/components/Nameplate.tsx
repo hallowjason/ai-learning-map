@@ -9,37 +9,39 @@ interface NameplateProps {
 }
 
 export default function Nameplate({ user, isMe, driftClass = "drift" }: NameplateProps) {
-  const lotuses = "🪷".repeat(user.lotus_in_zone);
+  const safeLotusCount = Math.max(0, Math.min(5, user.lotus_in_zone | 0));
+  const lotuses = "🪷".repeat(safeLotusCount);
 
   return (
-    <div className={`relative inline-flex flex-col items-center ${driftClass}`}>
-      {/* Lotus row sits above the nameplate */}
-      {user.lotus_in_zone > 0 && (
+    <div
+      className={`relative inline-flex flex-col items-center ${driftClass}`}
+      style={{ padding: "18px 14px" }}
+      title={user.name}
+    >
+      {/* Lotus row — horizontally centered above the name */}
+      {safeLotusCount > 0 && (
         <div
-          className="absolute -top-5 right-0 text-xs leading-none whitespace-nowrap"
-          style={{ filter: "drop-shadow(0 1px 1px rgba(0,0,0,0.15))" }}
+          className="absolute top-0 left-1/2 -translate-x-1/2 text-xs leading-none whitespace-nowrap"
+          style={{ filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.4))" }}
         >
           {lotuses}
         </div>
       )}
 
-      {/* Vertical name */}
+      {/* Vertical name with outside stroke (no color box) */}
       <div
-        className={`vertical-name px-1.5 py-2 rounded-md border-2 text-sm leading-tight tracking-widest select-none
-          ${isMe
-            ? "border-coral bg-coral/15 text-ink shadow-md font-bold scale-110 ring-2 ring-coral/40"
-            : "border-ink/40 bg-cream/95 text-ink/85"
-          }
-        `}
-        style={{ minHeight: "60px" }}
-        title={user.name}
+        className={`vertical-name select-none leading-tight ${
+          isMe ? "name-stroke-me text-base" : "name-stroke text-sm"
+        }`}
       >
         {user.name}
       </div>
 
-      {/* Tiny pointer arrow under the plate */}
+      {/* Pointer arrow */}
       <div
-        className={`mt-0.5 text-[10px] leading-none ${isMe ? "text-coral" : "text-ink/40"}`}
+        className={`mt-1 leading-none ${
+          isMe ? "name-pointer-me text-[12px] text-white" : "name-pointer text-[10px] text-white"
+        }`}
       >
         ▼
       </div>

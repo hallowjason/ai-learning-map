@@ -1,5 +1,7 @@
 import type { Zone, ZoneId } from './types';
 
+export { ZONE_PAIR_IMAGES } from './types';
+
 // Practice → Zone mapping (md original order)
 export const ZONE_PRACTICES: Record<ZoneId, string[]> = {
   1: ['0', '1', '2'],         // Lesson 1 上半 — 建立信心
@@ -8,42 +10,48 @@ export const ZONE_PRACTICES: Record<ZoneId, string[]> = {
   4: ['8', '9', '4b'],        // Lesson 2 下半 — 個人化
 };
 
+// Cluster coords are normalized 0..1 within the zone's HALF of the paired image.
+// One half = one viewport-width.
 export const ZONES: Zone[] = [
   {
     id: 1,
     title: 'Lesson 1 上半',
     subtitle: '建立信心',
     practiceIds: ZONE_PRACTICES[1],
-    image: '/assets/zone1.png',
-    // village zone — open meadow center-right
-    cluster: { x: 0.45, y: 0.65, w: 0.45, h: 0.25 },
+    pair: 'A',
+    half: 'left',
+    // yellow rapeseed meadow in front of cottage
+    cluster: { x: 0.30, y: 0.62, w: 0.55, h: 0.22 },
   },
   {
     id: 2,
     title: 'Lesson 1 下半',
     subtitle: '建立習慣',
     practiceIds: ZONE_PRACTICES[2],
-    image: '/assets/zone2.png',
-    // forest clearing — center
-    cluster: { x: 0.30, y: 0.70, w: 0.55, h: 0.22 },
+    pair: 'A',
+    half: 'right',
+    // open grassy slope along foreground path, clear of conifers
+    cluster: { x: 0.18, y: 0.60, w: 0.55, h: 0.25 },
   },
   {
     id: 3,
     title: 'Lesson 2 上半',
     subtitle: '擴展能力',
     practiceIds: ZONE_PRACTICES[3],
-    image: '/assets/zone3.png',
-    // riverbank foreground — left half
-    cluster: { x: 0.10, y: 0.70, w: 0.50, h: 0.22 },
+    pair: 'B',
+    half: 'left',
+    // flat grass bank to the right of the creek/footbridge
+    cluster: { x: 0.30, y: 0.60, w: 0.55, h: 0.25 },
   },
   {
     id: 4,
     title: 'Lesson 2 下半',
     subtitle: '個人化',
     practiceIds: ZONE_PRACTICES[4],
-    image: '/assets/zone4.png',
-    // plateau at mountain base — bottom-left
-    cluster: { x: 0.05, y: 0.72, w: 0.50, h: 0.22 },
+    pair: 'B',
+    half: 'right',
+    // open dirt trail at mountain base, below the zigzag path
+    cluster: { x: 0.10, y: 0.65, w: 0.50, h: 0.22 },
   },
 ];
 

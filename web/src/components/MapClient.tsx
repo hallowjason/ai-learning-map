@@ -72,16 +72,19 @@ export default function MapClient() {
 
   return (
     <div className="min-h-screen bg-cream">
-      <header className="sticky top-0 z-10 bg-cream/85 backdrop-blur border-b border-ink/10">
+      <header
+        className="sticky top-0 z-10 bg-cream/85 backdrop-blur border-b"
+        style={{ borderColor: "var(--color-border)" }}
+      >
         <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="font-display text-xl font-bold text-ink">AI 學習地圖</span>
-            <span className="hidden sm:inline text-xs text-ink/50">
+            <span className="font-display text-xl font-semibold text-ink tracking-tight">AI 學習地圖</span>
+            <span className="hidden sm:inline text-xs text-ink-soft">
               {totalDone} / {TOTAL_PRACTICES} 全部進度
             </span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-sm text-ink/70">
+            <span className="text-sm text-ink-soft">
               👋 <span className="font-medium text-ink">{myName}</span>
               <span className="ml-2 text-coral text-xs">
                 Zone {myZone}・{ZONES[myZone - 1].subtitle}
@@ -92,7 +95,7 @@ export default function MapClient() {
                 window.localStorage.removeItem(STORAGE_KEY);
                 router.push("/");
               }}
-              className="text-xs text-ink/50 hover:text-ink"
+              className="text-xs text-ink-soft hover:text-ink"
             >
               登出
             </button>
@@ -102,7 +105,10 @@ export default function MapClient() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
         {error && (
-          <div className="mb-4 p-4 rounded-xl border-2 border-coral bg-coral/10 text-ink text-sm">
+          <div
+            className="mb-4 p-4 rounded-xl border bg-coral/10 text-ink text-sm"
+            style={{ borderColor: "var(--color-coral)" }}
+          >
             {error}
           </div>
         )}
@@ -110,9 +116,12 @@ export default function MapClient() {
         <Panorama users={users} myName={myName} myZone={myZone} />
 
         {allDone ? (
-          <section className="mt-10 p-8 rounded-2xl bg-mountain/15 border-2 border-mountain text-center">
-            <h2 className="font-display text-3xl font-bold text-ink">🎉 恭喜登頂</h2>
-            <p className="mt-2 text-ink/70">你已完成全部 {TOTAL_PRACTICES} 個練習。山頂的旗子是為你而插。</p>
+          <section
+            className="mt-10 p-8 rounded-2xl bg-cream border text-center"
+            style={{ borderColor: "var(--color-border)" }}
+          >
+            <h2 className="font-display text-3xl font-semibold text-ink tracking-tight">🎉 恭喜登頂</h2>
+            <p className="mt-2 text-ink-soft">你已完成全部 {TOTAL_PRACTICES} 個練習。山頂的旗子是為你而插。</p>
           </section>
         ) : course ? (
           <PracticeSection
@@ -128,10 +137,16 @@ export default function MapClient() {
 
       {showCelebrate !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
-          <div className="bg-cream/95 px-10 py-8 rounded-3xl shadow-2xl border-4 border-coral text-center animate-bounce">
+          <div
+            className="bg-cream px-10 py-8 rounded-3xl border-2 text-center animate-bounce"
+            style={{
+              borderColor: "var(--color-coral)",
+              boxShadow: "rgba(0,0,0,0.1) 0 4px 12px, rgba(0,0,0,0.08) 0 24px 48px",
+            }}
+          >
             <div className="text-6xl mb-2">🪷</div>
-            <p className="font-display text-3xl font-bold text-ink">進入 Zone {showCelebrate}</p>
-            <p className="text-ink/70 mt-1">{ZONES[showCelebrate - 1].subtitle}</p>
+            <p className="font-display text-3xl font-semibold text-ink tracking-tight">進入 Zone {showCelebrate}</p>
+            <p className="text-ink-soft mt-1">{ZONES[showCelebrate - 1].subtitle}</p>
           </div>
         </div>
       )}
