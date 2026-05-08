@@ -1,89 +1,143 @@
-# Session Context — 2026-05-08
+# Session Context — 2026-05-09
 
 ## 專案路徑
-`/Users/gooo/Desktop/.claude/projects/ai-learning-map` (branch: main)
-線上：**https://hallowjason.github.io/ai-learning-map/**
+/Users/gooo/Desktop/.claude/projects/ai-learning-map (branch: main)
 
-## 上次完成
+## 線上資源
+- **網站**：https://hallowjason.github.io/ai-learning-map/
+- **管理者頁**：https://hallowjason.github.io/ai-learning-map/admin/（無需登入、純預覽全部練習）
+- **壓力測試**：在任何頁面加 `?stress=100`（最大 200，純前端、不寫 DB）
+- **Repo**：https://github.com/hallowjason/ai-learning-map
+- **DB**：Supabase project `nytlxamxgxyryfcuulrp`
 
-**核心架構**：Next.js 16.2.5 (App Router) + Tailwind 4 + Supabase + GitHub Pages 靜態匯出
-**功能完整度**：90%（登入、4 zone、蓮花計數、Realtime、自動部署都通），剩 UI bug 一個
+## 本次 Session 摘要（2026-05-08 ~ 05-09）
 
-**已完成**
-- `/draw` 產出 5 張地圖素材（zone1-4 + panorama），用 outpainting + feather blend 接縫
-- Supabase schema：`public.users`（name PK + current_zone + lotus_in_zone + completed_practices[]）+ RLS open + Realtime
-- Course md → 11 張練習卡解析器（測試 11/11 通過）
-- UI：登入填名 → /map 全景 + 浮動姓名牌 + 練習 modal + zone 跳級慶祝
-- GitHub Action：push 自動 build static export → deploy GitHub Pages
-- Secrets 已 set（`NEXT_PUBLIC_SUPABASE_URL` / `_ANON_KEY` / `_CONTENT_BASE_URL`）
+主軸：**從「能跑」進化到「工作坊現場可用」**。視覺、體驗、無障礙、容量、管理者工具五個方向全面升級。
 
-**檔案結構**
+### 本 session 的 commits（新到舊）
 ```
-ai-learning-map/
-├── 課程架構.md              — 內容唯一來源（push 即更新）
-├── 附件/                    — 教材原始資料
-├── assets/                  — zone1-4.png + panorama.png + drafts/
-├── supabase/migrations/001_init.sql
-├── SETUP.md
-├── .github/workflows/deploy.yml
-└── web/                     — Next.js app
-    ├── .env.local           — keys（不 commit）
-    ├── public/assets/       — 5 張圖
-    └── src/
-        ├── app/             layout / page (登入) / map/page
-        ├── components/      MapClient / Panorama / Nameplate / PracticeSection / PracticeModal
-        └── lib/             supabase / types / zones / parseCourse / content / progress
+f77e8d6 feat: editable display name + font scale + progress bar + hold-to-confirm
+2edd53a feat: admin/preview page at /admin for facilitator review
+7bac332 fix: load creamfont via next/font/local for static-export basePath
+5ff58eb feat: per-zone visible cap + roster panel + stress-test mode
+5244bd8 feat: paired-image carousel + Lovable theme + creamfont nameplates
 ```
 
-## 待辦 / 未完成
+### 重大改動
 
-1. **🐛 UI bug — 全景圖在 prod 沒顯示**（見此 session 截圖）
-   - 4 zone 框 + 標籤都對，但底圖（panorama.png）沒出現
-   - 直接 curl `${URL}/assets/panorama.png` 200 正常
-   - 推測：`Panorama.tsx` 的 `<Image src="/assets/panorama.png">` 在 static export + basePath + unoptimized 沒自動加 prefix
-   - **已派子 agent 排查中**（見子 agent 報告）
-2. **README.md** — 已派另一個子 agent 寫
-3. 可選優化（沒急）：
-   - 100 人在線時腹地名牌 layout 擠不擠（目前 flex-wrap）
-   - zone 切換 slide 動畫（目前只有 popup 慶祝）
-   - mobile / 小螢幕沒測
+#### 1. 視覺系統大改（5244bd8）
+- **配色**：套用 Lovable design system — cream `#f7f4ed` / charcoal `#1c1c1c` / `#eceae4` borders / inset shadow on dark buttons / 大標 `letter-spacing: -0.02em ~ -0.04em` 收緊
+- **字體**：本地 creamfont-3.3，Noto Sans TC 作為 CJK fallback
+- **地圖**：從「4 張 1:1 獨立 zone 圖橫排」改成「2 張 paired wide 圖（zone12.png / zone34.png 各 1536×768，2:1）」的 carousel
+  - 每張 paired 圖內 zone 1↔2 / 3↔4 完全無縫（同一張圖）
+  - 唯一切換點是 pair A↔B（zone 2↔3）
+  - 視窗 2:1 widescreen，比之前 1:1 square 飽滿很多
+- **名牌**：黑字 + 白色 outside stroke（`-webkit-text-stroke: 3px #fff` + `paint-order: stroke fill`），自己 = 4px stroke + 珊瑚紅 drop-shadow
 
-## 重要決策與限制
+#### 2. 容量設計（5ff58eb）
+工作坊預期 ~100 人。每個 zone cluster 區域有上限，導入：
+- **Cluster cap = 18**：自己永遠在第一順位、超過顯示「+N 位夥伴」chip → 點開 RosterPanel 篩到該 zone
+- **RosterPanel**：右下角浮動 `👥 N 夥伴` 按鈕；點開抽屜（右側 360px）含搜尋框 + zone filter chips + 按 zone 分組名單；自己以珊瑚紅淺色高亮
+- **壓力測試 `?stress=N`**：URL param 注入 N 個假學員（zone 分布 40/25/20/15），banner 提示，純前端、不寫 DB
 
-**部署選擇歷程（重要）**
-- ❌ Vercel：使用者 OAuth 帳號被誤刪，無法重註冊
-- ❌ Zeabur：免費 shared cluster 已棄用，需自付費 server
-- ✅ **GitHub Pages**：靜態匯出 + gh CLI（hallowjason 已 auth）+ 零成本
-- 使用者偏好：**之後新專案優先用 Vercel CLI**（已寫進 memory），但本專案保持 GitHub Pages
+#### 3. Font basePath fix（7bac332）
+- 手寫 `@font-face { src: url("/fonts/...") }` 在 static export 不會加 basePath prefix → 上線 404
+- 改用 `next/font/local` — Next.js 自動處理 hash + basePath，font 移到 `web/src/app/fonts/creamfont.otf`
+- globals.css 的 `--font-sans` 改用 `var(--font-cream)`
 
-**架構關鍵**
-- 內容流：md push → GitHub raw URL fetch（5 分鐘 CDN cache）→ 即時更新，不用 rebuild
-- 認證：純 localStorage 存 name（無密碼），RLS 開放（活動現場場控就好）
-- 圖片：`unoptimized: true`（GitHub Pages 沒 Image Optimization API）
-- basePath：`process.env.NEXT_PUBLIC_BASE_PATH`，CI 用 `actions/configure-pages` 自動取
+#### 4. 管理者頁（2edd53a）
+- 路徑 `/admin/`：列出全部 11 張練習卡（zone 分組）、不需登入、不訂閱 Supabase users
+- 點開 PracticeModal 帶 `previewOnly` prop → 沒有「我完成了」按鈕
+- header 連結到「壓力測試地圖」+「返回登入」
 
-**Supabase**
-- Project ID：`nytlxamxgxyryfcuulrp`（xzj071@gmail.com 帳號）
-- service_role key 留在 `web/.env.local` 備用，目前未使用
-- Schema 已套用，RLS open（讀/寫/更新都允許 anon）
+#### 5. 無障礙與防呆（f77e8d6 + migration 002）
+- **可改顯示名稱**：DB 加 `display_name` 欄位（migration 002，**今天已執行**），canonical `name` PK 不變；header ✎ → RenameDialog
+- **字體大小切換**：A⁻ / A / A⁺ / A⁺⁺ → 14/16/18/20px，存 localStorage；地圖名牌絕對 px 不受影響
+- **進度 bar**：取代「2 / 11 全部進度」文字，珊瑚→ink 漸層條 + tabular-nums 比例
+- **長按完成**：HoldToConfirm 元件（pointer-capture + RAF coral 漸層動畫），按「我完成了」→ 切換到 3 秒長按閘 → 完成才寫 DB
 
-**已知限制**
-- GitHub Pages 純靜態，所有 dynamic 都 client-side（Realtime 是純 WS 從 browser 直連 Supabase OK）
-- panorama.png 6MB 首次載入慢；可優化方向：用 4 張 zone 圖各自顯示，或壓縮 panorama
+## 重要檔案索引（本次新增/動較多）
+```
+web/src/app/
+├── admin/page.tsx                 # 管理者全部練習預覽（無登入）
+├── fonts/creamfont.otf            # 本地字體（next/font/local 載入）
+└── layout.tsx                     # 加 cream localFont + variable
 
-## 下次繼續
+web/src/components/
+├── Panorama.tsx                   # 2-pair carousel（pair/half model）
+├── Nameplate.tsx                  # 黑字白框 + clamp lotus + display_name
+├── RosterPanel.tsx                # 浮動夥伴名單 + 搜尋 + zone filter
+├── RenameDialog.tsx               # 改顯示名字
+├── FontScaleControl.tsx           # 字體大小切換器
+├── HoldToConfirm.tsx              # 長按 3 秒確認
+├── PracticeModal.tsx              # 加 previewOnly + HoldToConfirm 整合
+└── MapClient.tsx                  # 整合 stress mode / roster / rename / font scale
 
-```bash
+web/src/lib/
+├── stress.ts                      # 假學員產生器（含 display_name: null）
+├── zones.ts                       # pair 'A'/'B' + half 'left'/'right' + cluster 座標
+├── types.ts                       # ZONE_PAIR_IMAGES + Zone (pair/half) + display_name
+└── progress.ts                    # 加 setDisplayName() / getDisplayName()
+
+web/public/assets/
+├── zone12.png  (1536×768, 2:1)    # paired Lesson 1（村莊 → 森林）
+└── zone34.png  (1536×768, 2:1)    # paired Lesson 2（溪谷 → 山頂）
+
+supabase/migrations/
+├── 001_init.sql                   # 已執行
+└── 002_display_name.sql           # 已執行（2026-05-09）
+```
+
+## Supabase Schema 現況（含 002）
+```sql
+create table users (
+  name TEXT primary key,
+  display_name TEXT,                        -- ✨ 002 新增
+  current_zone INT default 1,
+  lotus_in_zone INT default 0,
+  completed_practices TEXT[] default '{}',
+  created_at TIMESTAMPTZ default now(),
+  last_active TIMESTAMPTZ default now()
+);
+create index users_display_name_idx
+  on users (lower(coalesce(display_name, name)));
+-- RLS 全開、Realtime 已啟用
+```
+
+## 環境變數（GitHub Secrets 已設定）
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `NEXT_PUBLIC_CONTENT_BASE_URL` = `https://raw.githubusercontent.com/hallowjason/ai-learning-map/main`
+
+## 關鍵技術陷阱（踩過的雷）
+
+1. **next.js basePath 不會自動套用到 CSS `url()`** — 一律用 `next/font/local` / `next/image` 配 `assetPath()` helper
+2. **Tailwind 4 + Turbopack HMR 卡 CSS** — 改 `@theme` token 後 dev server 不會更新 CSS chunk，要 `pkill next dev && rm -rf .next && npm run dev` 強制重啟
+3. **多層 text-shadow 在中文字會疊成糊狀** — 一定要用 `-webkit-text-stroke` + `paint-order: stroke fill`，不能用 shadow 模擬
+4. **viewport `aspectRatio: 1/1` + `maxHeight: vh` 會被 height 拉扁** — 用 `maxWidth: min(100%, Nvh)` 或 `aspectRatio: 2/1` 配自然 width 才正確
+5. **assets 雙位置**：project root `/assets/` 是 `/draw` 輸出位置（草稿），實際靜態資源在 `web/public/assets/`，每次生圖要 cp 過去
+6. **React 19 `react-hooks/set-state-in-effect`** — 在 effect 裡 setState 會被 lint 警告；prop 同步用 derive-during-render（兩個 useState + render-phase if）
+
+## 下次可做（low priority）
+
+- mobile RWD 名牌位置微調（手機上 cluster 容易被切）
+- 想加更多卡片 / 改卡片 zone 歸屬 → 改 `課程架構.md` + 同步 `web/src/lib/zones.ts` 的 `ZONE_PRACTICES`
+- 投影模式（隱藏 header、cluster 放大、自動輪播 pair A↔B）— 投在大螢幕用
+- 多語言（i18n）— 目前繁中寫死
+
+## 改 `課程架構.md` 並發布的指令
+
+對 Claude Code 說：「**檢查課程架構.md 並發布**」 → 我會跑 parser 驗證 + build + push。
+
+**必須維持的格式**：
+- `## 練習 <id>：<title>` — `## 練習 ` 前綴 + 半形空白 + id + 全形冒號 + title
+- id 不要動（會跟 `zones.ts` 對不上），常見：`0/1/2/3/4a/4b/5/6/7/8/9`
+- 內容部分自由（任意 markdown）
+
+新增/刪除卡片需同步改 `web/src/lib/zones.ts` 的 `ZONE_PRACTICES`，**告訴我** id 和要塞到哪個 zone，我會幫你動。
+
+## 下次繼續的指令
+```
 cd /Users/gooo/Desktop/.claude/projects/ai-learning-map
-
-# 本地開發
-cd web && npm run dev
-
-# 部署（直接 push）
-git add -A && git commit -m "..." && git push
-
-# 看部署狀態
-gh run list --repo hallowjason/ai-learning-map --limit 3
+# 對 Claude Code 說：「繼續上次的工作」
 ```
-
-**最先處理**：UI bug 修完（看子 agent 報告，通常一兩行 code 修好）→ 重測 prod。
