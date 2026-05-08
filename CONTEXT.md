@@ -1,3 +1,92 @@
+# Session Context — 2026-05-09（夜間追加）
+
+## 2026-05-09 夜間 session 摘要
+
+主軸：**課程內容改版 v2（11→9 練習）+ 卡片渲染體驗強化**
+
+### Commits（新到舊）
+```
+236f726 fix: inline copy-bar styles for CDN/cache resilience
+c157568 fix(parser): cut practice body at horizontal rule (---)
+2942038 feat: render Obsidian images + always-visible copy button
+ba5a4a6 feat: course content v2 — 9 practices (was 11)
+```
+
+### 1. 課程內容 v2（ba5a4a6）
+
+**改動**：用戶在 main 直接編輯 `課程架構.md` — 重新編號 + 移除 Google Calendar 練習 + 移除 4b
+- 舊 11 張：`0,1,2,3,4a,5,6,7,8,9,4b`
+- 新 9 張：`0,1,2,3,4,5,6,7,8`（連續編號）
+
+**zones.ts 同步**：
+| Zone | 舊 | 新 |
+|---|---|---|
+| 1 建立信心 | 0,1,2 | 0,1,2 |
+| 2 建立習慣 | 3,4a | 3,4 |
+| 3 擴展能力 | 7,5,6 | 5,6 |
+| 4 個人化 | 8,9,4b | 7,8 |
+
+進度條/總卡片數會自動跟著 `TOTAL_PRACTICES = ZONES.reduce(...)` 更新，不用手動改。
+
+### 2. Obsidian 語法 → 標準 markdown（2942038）
+
+`web/src/lib/content.ts` 加 `transformObsidianSyntax(md, baseUrl)`：
+- `![[xxx.png]]` → `![xxx.png](<NEXT_PUBLIC_CONTENT_BASE_URL>/附件/xxx.png)`（從 GitHub raw 直接服務，免複製到 public/）
+- `[[xxx]]` → `**「xxx」**`（粗體提示，附件由講師現場發 — 不公開）
+
+新 PNG 加入 repo（`附件/*.png`，內容為 UI 截圖、無 secrets）。`.markdown-body img` CSS 加圓角 + 邊框 + 陰影。
+
+### 3. 複製按鈕大改（2942038 + 236f726）
+
+**舊**：右上角 hover 才出現的小按鈕（手機看不到）
+**新**：黑色 header bar 永遠在程式碼框上方，左邊「提示詞 — 複製到 Codex / Claude 對話框」標籤，右邊「📋 複製 / ✓ 已複製」按鈕
+
+`web/src/components/PracticeModal.tsx` 的 `CopyablePre` 組件改寫，**bar 跟按鈕的關鍵 layout（flex / 深色背景 / 按鈕邊框）用 inline style**（236f726 加上）— CDN edge cache 不同步或瀏覽器擴充注入 CSS 都不影響渲染。CSS class 也保留，雙保險。
+
+### 4. Parser bug fix（c157568）
+
+**Bug**：每個練習的 body 只在「下一個練習行」結束 → 最後一個練習會吃掉後面的 `---` 跟下一節 `## Lesson 2 下半` 標題，跑進卡片裡。
+
+**修法**：`web/src/lib/parseCourse.ts` 新增 `isBoundary()` — body 走到 horizontal rule (`---`) 就提前截斷。下一節標題在 HR 之後，順帶排除。練習內部 `####` 子標題仍保留（未來擴充用）。
+
+### 5. 課程架構 md 排版修正
+
+ordered list 在 `1.打開` 沒空格時 markdown parser 不會渲染成數字列表 → 用戶（或某個 hook）已自動補上空格 `1. 打開`。
+
+## ⚠️ 安全事件（已處置但需後續行動）
+
+`附件/draw-skill-中文通用版.md` 跟 `附件/whisper-skill-中文通用版.md` 內含**真實 OpenAI API key**（`sk-proj-MLirvg3...`）— 用戶刻意內嵌、教學用。
+
+**已處置**：
+- GitHub Push Protection 擋下首次 push
+- 我把 `附件/` 修改 unstage、用乾淨的 commit push（key 沒進 GitHub）
+- 兩份 .md 仍在本機 working tree，**未被追蹤異動**（已存在於初始 commit `18c7e81` 之前的版本則無 key）
+
+**用戶決定**：教學現場走群組分發附件、不放 GitHub。
+
+**待做**：課程結束後到 https://platform.openai.com/api-keys revoke 這把 key（即使有 usage limit，外洩風險仍高）。下次開課重生新 key。
+
+## 本次 session 用到的新工具
+
+- **Claude Preview MCP**（`mcp__Claude_Preview__*`）— 跑本地 dev server + 直接 query DOM 驗證 CSS computed style，比 puppeteer + playwright 快很多
+  - launch.json 在 `.claude/launch.json`（worktree root）
+  - 主用法：`preview_start` → `preview_eval` 跑 IIFE 抓 `getComputedStyle()` → `preview_screenshot` 視覺確認
+
+## 線上資源（更新）
+
+- **網站**：https://hallowjason.github.io/ai-learning-map/
+- **管理者頁**：https://hallowjason.github.io/ai-learning-map/admin/（顯示 9 張卡片）
+- **Repo**：https://github.com/hallowjason/ai-learning-map
+
+## 下次繼續的指令
+
+```bash
+cd /Users/gooo/Desktop/.claude/projects/ai-learning-map
+# 對 Claude Code 說：「繼續上次的工作」
+```
+
+---
+
 # Session Context — 2026-05-09
 
 ## 專案路徑
