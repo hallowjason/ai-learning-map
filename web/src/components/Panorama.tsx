@@ -11,9 +11,14 @@ interface PanoramaProps {
   users: UserRow[];
   myName: string | null;
   myZone: ZoneId;
+  onOpenRoster: (zoneId?: ZoneId) => void;
 }
 
 const driftClasses = ["drift", "drift drift-slow", "drift drift-fast"];
+
+// Per-zone cap on visible nameplates. Beyond this, the rest collapses into a
+// "+N 位夥伴" chip that opens the roster panel.
+const VISIBLE_CAP = 18;
 
 const PAIRS: ('A' | 'B')[] = ['A', 'B'];
 
@@ -33,7 +38,7 @@ const PAIR_LABELS: Record<'A' | 'B', { lesson: string; subtitle: string }> = {
  * Cluster overlays sit on each zone's half of the visible pair, so both zones
  * in a pair show their nameplate clusters simultaneously.
  */
-export default function Panorama({ users, myName, myZone }: PanoramaProps) {
+export default function Panorama({ users, myName, myZone, onOpenRoster }: PanoramaProps) {
   // Clamp myZone defensively — `current_zone` from the DB is unbounded number.
   const clampedZone = Math.min(4, Math.max(1, myZone)) as ZoneId;
   // Pair index: zones 1,2 → 0 ; zones 3,4 → 1
@@ -105,6 +110,16 @@ export default function Panorama({ users, myName, myZone }: PanoramaProps) {
                   const zoneUsers = byZone[zone.id];
                   const isMyZone = zone.id === clampedZone;
                   const halfLeft = zone.half === 'left' ? 0 : 50;
+
+                  // Sort: my own nameplate always first → never gets clipped by the cap.
+                  const sorted = [...zoneUsers].sort((a, b) => {
+                    if (a.name === myName) return -1;
+                    if (b.name === myName) return 1;
+                    return 0;
+                  });
+                  const visible = sorted.slice(0, VISIBLE_CAP);
+                  const overflow = Math.max(0, sorted.length - visible.length);
+
                   return (
                     <div
                       key={zone.id}
@@ -132,7 +147,7 @@ export default function Panorama({ users, myName, myZone }: PanoramaProps) {
                           overflow: "visible",
                         }}
                       >
-                        {zoneUsers.map((u, i) => (
+                        {visible.map((u, i) => (
                           <Nameplate
                             key={u.name}
                             user={u}
@@ -140,6 +155,16 @@ export default function Panorama({ users, myName, myZone }: PanoramaProps) {
                             driftClass={driftClasses[i % driftClasses.length]}
                           />
                         ))}
+                        {overflow > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => onOpenRoster(zone.id)}
+                            className="px-2.5 py-1.5 rounded-full text-xs font-medium bg-ink text-cream btn-inset self-end whitespace-nowrap hover:opacity-90"
+                            aria-label={`查看其他 ${overflow} 位夥伴`}
+                          >
+                            +{overflow} 位夥伴
+                          </button>
+                        )}
                       </div>
                     </div>
                   );

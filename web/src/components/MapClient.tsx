@@ -4,9 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Panorama from "./Panorama";
 import PracticeSection from "./PracticeSection";
+import RosterPanel from "./RosterPanel";
 import { loadCourse } from "@/lib/content";
 import { completePractice, subscribeAllUsers } from "@/lib/progress";
 import { getPracticesForZone } from "@/lib/parseCourse";
+import { generateStressUsers } from "@/lib/stress";
 import { ZONES, TOTAL_PRACTICES } from "@/lib/zones";
 import type { Practice, UserRow, ZoneId } from "@/lib/types";
 
@@ -19,7 +21,18 @@ export default function MapClient() {
   const [course, setCourse] = useState<Practice[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showCelebrate, setShowCelebrate] = useState<ZoneId | null>(null);
+  const [rosterOpen, setRosterOpen] = useState(false);
+  const [rosterZone, setRosterZone] = useState<ZoneId | null>(null);
   const lastZoneRef = useRef<ZoneId | null>(null);
+
+  // Read `?stress=N` once at mount for dev-only fake-user mode. The lazy
+  // initialiser runs after hydration; SSR returns 0 and React reconciles.
+  const [stressCount] = useState<number>(() => {
+    if (typeof window === "undefined") return 0;
+    const params = new URLSearchParams(window.location.search);
+    const n = parseInt(params.get("stress") ?? "0", 10);
+    return Number.isFinite(n) && n > 0 ? Math.min(200, n) : 0;
+  });
 
   // 1. Load user name from localStorage; redirect if absent
   useEffect(() => {
@@ -31,15 +44,21 @@ export default function MapClient() {
     setMyName(saved);
   }, [router]);
 
-  // 2. Subscribe to realtime users + load course content
+  // 2. Subscribe to realtime users + load course content. In stress mode we
+  // synthesise users locally and skip the realtime subscribe.
   useEffect(() => {
     if (!myName) return;
-    const unsub = subscribeAllUsers((rows) => setUsers(rows));
     loadCourse()
       .then(setCourse)
       .catch((e) => setError(`載入練習失敗：${e instanceof Error ? e.message : String(e)}`));
+
+    if (stressCount > 0) {
+      setUsers(generateStressUsers(stressCount, myName));
+      return;
+    }
+    const unsub = subscribeAllUsers((rows) => setUsers(rows));
     return () => unsub();
-  }, [myName]);
+  }, [myName, stressCount]);
 
   const me = users.find((u) => u.name === myName) ?? null;
   const myZone: ZoneId = (me?.current_zone ?? 1) as ZoneId;
@@ -62,6 +81,11 @@ export default function MapClient() {
   async function handleComplete(practiceId: string) {
     if (!myName) return;
     await completePractice(myName, practiceId);
+  }
+
+  function openRoster(zoneId?: ZoneId) {
+    setRosterZone(zoneId ?? null);
+    setRosterOpen(true);
   }
 
   if (!myName) return null;
@@ -113,7 +137,12 @@ export default function MapClient() {
           </div>
         )}
 
-        <Panorama users={users} myName={myName} myZone={myZone} />
+        <Panorama
+          users={users}
+          myName={myName}
+          myZone={myZone}
+          onOpenRoster={openRoster}
+        />
 
         {allDone ? (
           <section
@@ -134,6 +163,33 @@ export default function MapClient() {
           <p className="mt-8 text-center text-ink/50">載入練習中…</p>
         )}
       </main>
+
+      {/* Floating roster trigger (always visible) */}
+      <button
+        type="button"
+        onClick={() => openRoster()}
+        className="fixed bottom-5 right-5 z-30 px-4 py-2.5 rounded-full bg-ink text-cream text-sm font-medium btn-inset hover:opacity-90 active:opacity-80 transition flex items-center gap-2"
+        aria-label="開啟夥伴名單"
+      >
+        <span aria-hidden>👥</span>
+        <span>{users.length}</span>
+        <span className="hidden sm:inline">夥伴</span>
+      </button>
+
+      <RosterPanel
+        users={users}
+        myName={myName}
+        open={rosterOpen}
+        initialZone={rosterZone}
+        onClose={() => setRosterOpen(false)}
+      />
+
+      {/* Stress-mode banner */}
+      {stressCount > 0 && (
+        <div className="fixed top-3 left-1/2 -translate-x-1/2 z-40 px-3 py-1.5 rounded-full text-[11px] font-medium bg-coral/95 text-cream btn-inset">
+          🧪 壓力測試模式 — {stressCount} 假帳號（不寫入 DB）
+        </div>
+      )}
 
       {showCelebrate !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
