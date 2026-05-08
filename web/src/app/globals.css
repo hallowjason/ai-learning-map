@@ -1,13 +1,9 @@
 @import "tailwindcss";
 
-/* ───────── creamfont (local) ───────── */
-@font-face {
-  font-family: "Cream";
-  src: url("/fonts/creamfont.otf") format("opentype");
-  font-weight: 100 900;
-  font-style: normal;
-  font-display: swap;
-}
+/* creamfont is loaded via `next/font/local` in layout.tsx and exposed as
+   `--font-cream`. Next.js handles the @font-face declaration, hashing, and
+   basePath rewriting (manual url() in CSS doesn't get the basePath prefix
+   under static export). */
 
 @theme {
   /* Lovable palette — warm cream + charcoal */
@@ -27,8 +23,8 @@
   --color-mountain: #8C7AB6;
 
   /* Typography — creamfont primary, Noto fallback for CJK */
-  --font-sans: "Cream", var(--font-noto-sans), "PingFang TC", "Heiti TC", sans-serif;
-  --font-display: "Cream", var(--font-noto-serif), "Noto Serif TC", serif;
+  --font-sans: var(--font-cream), var(--font-noto-sans), "PingFang TC", "Heiti TC", sans-serif;
+  --font-display: var(--font-cream), var(--font-noto-serif), "Noto Serif TC", serif;
   --font-mono: var(--font-mono-jp), "Menlo", "Monaco", monospace;
 }
 
