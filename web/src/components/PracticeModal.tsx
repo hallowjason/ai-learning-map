@@ -164,20 +164,55 @@ function CopyablePre({ children, ...rest }: React.HTMLAttributes<HTMLPreElement>
     }
   }
 
+  // Inline styles for the bar layout — bullet-proof against CSS chunk
+  // load-order issues on static export / CDN edge caches. The colors/spacing
+  // are the same as the .copyable-pre__* rules in globals.css; either source
+  // produces an identical bar.
   return (
-    <div className="copyable-pre">
-      <div className="copyable-pre__bar">
-        <span className="copyable-pre__label">提示詞 — 複製到 Codex / Claude 對話框</span>
+    <div
+      className="copyable-pre"
+      style={{ margin: "0.9em 0", borderRadius: 8, overflow: "hidden", boxShadow: "rgba(0,0,0,0.06) 0 1px 2px 0" }}
+    >
+      <div
+        className="copyable-pre__bar"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: "0.8em",
+          padding: "0.55em 0.85em 0.55em 1em",
+          background: "rgba(28, 28, 28, 0.92)",
+          color: "var(--color-cream)",
+          fontSize: "0.78em",
+          borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
+        }}
+      >
+        <span style={{ letterSpacing: "0.02em", opacity: 0.78 }}>
+          提示詞 — 複製到 Codex / Claude 對話框
+        </span>
         <button
           onClick={copy}
-          className="copyable-pre__btn"
           type="button"
           aria-label="複製到剪貼簿"
+          style={{
+            appearance: "none",
+            border: "1px solid rgba(255, 255, 255, 0.22)",
+            background: "rgba(255, 255, 255, 0.08)",
+            color: "var(--color-cream)",
+            padding: "0.32em 0.75em",
+            borderRadius: 6,
+            fontSize: "0.95em",
+            fontWeight: 500,
+            cursor: "pointer",
+            whiteSpace: "nowrap",
+          }}
         >
           {copied ? "✓ 已複製" : "📋 複製"}
         </button>
       </div>
-      <pre {...rest}>{children}</pre>
+      <pre {...rest} style={{ borderRadius: 0, margin: 0 }}>
+        {children}
+      </pre>
     </div>
   );
 }
