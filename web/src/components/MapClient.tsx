@@ -5,12 +5,14 @@ import { useRouter } from "next/navigation";
 import Panorama from "./Panorama";
 import PracticeSection from "./PracticeSection";
 import RosterPanel from "./RosterPanel";
+import RenameDialog from "./RenameDialog";
+import FontScaleControl from "./FontScaleControl";
 import { loadCourse } from "@/lib/content";
-import { completePractice, subscribeAllUsers } from "@/lib/progress";
+import { completePractice, setDisplayName, subscribeAllUsers } from "@/lib/progress";
 import { getPracticesForZone } from "@/lib/parseCourse";
 import { generateStressUsers } from "@/lib/stress";
 import { ZONES, TOTAL_PRACTICES } from "@/lib/zones";
-import type { Practice, UserRow, ZoneId } from "@/lib/types";
+import { getDisplayName, type Practice, type UserRow, type ZoneId } from "@/lib/types";
 
 const STORAGE_KEY = "ai-learning-map.userName";
 
@@ -23,6 +25,7 @@ export default function MapClient() {
   const [showCelebrate, setShowCelebrate] = useState<ZoneId | null>(null);
   const [rosterOpen, setRosterOpen] = useState(false);
   const [rosterZone, setRosterZone] = useState<ZoneId | null>(null);
+  const [renameOpen, setRenameOpen] = useState(false);
   const lastZoneRef = useRef<ZoneId | null>(null);
 
   // Read `?stress=N` once at mount for dev-only fake-user mode. The lazy
@@ -88,11 +91,25 @@ export default function MapClient() {
     setRosterOpen(true);
   }
 
+  async function handleRename(newDisplayName: string | null) {
+    if (!myName) return;
+    if (stressCount > 0) {
+      // Stress mode: update synthetic users locally without hitting DB.
+      setUsers((prev) =>
+        prev.map((u) => (u.name === myName ? { ...u, display_name: newDisplayName } : u))
+      );
+      return;
+    }
+    await setDisplayName(myName, newDisplayName);
+  }
+
   if (!myName) return null;
 
   const zonePractices = course ? getPracticesForZone(course, myZone) : [];
   const totalDone = me?.completed_practices.length ?? 0;
   const allDone = totalDone >= TOTAL_PRACTICES;
+  const myLabel = me ? getDisplayName(me) : myName;
+  const progressPct = Math.round((totalDone / TOTAL_PRACTICES) * 100);
 
   return (
     <div className="min-h-screen bg-cream">
@@ -100,19 +117,52 @@ export default function MapClient() {
         className="sticky top-0 z-10 bg-cream/85 backdrop-blur border-b"
         style={{ borderColor: "var(--color-border)" }}
       >
-        <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <span className="font-display text-xl font-semibold text-ink tracking-tight">AI 學習地圖</span>
-            <span className="hidden sm:inline text-xs text-ink-soft">
-              {totalDone} / {TOTAL_PRACTICES} 全部進度
+        <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between gap-3 flex-wrap">
+          <div className="flex items-center gap-4 min-w-0">
+            <span className="font-display text-xl font-semibold text-ink tracking-tight whitespace-nowrap">
+              AI 學習地圖
             </span>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-ink-soft">
-              👋 <span className="font-medium text-ink">{myName}</span>
-              <span className="ml-2 text-coral text-xs">
-                Zone {myZone}・{ZONES[myZone - 1].subtitle}
+            {/* Progress bar */}
+            <div
+              className="hidden sm:flex items-center gap-2"
+              role="progressbar"
+              aria-valuenow={totalDone}
+              aria-valuemin={0}
+              aria-valuemax={TOTAL_PRACTICES}
+              aria-label="全部進度"
+            >
+              <div
+                className="w-32 h-2 rounded-full overflow-hidden"
+                style={{ backgroundColor: "rgba(28, 28, 28, 0.08)" }}
+              >
+                <div
+                  className="h-full transition-[width] duration-500"
+                  style={{
+                    width: `${progressPct}%`,
+                    background:
+                      "linear-gradient(90deg, var(--color-coral) 0%, var(--color-ink) 100%)",
+                  }}
+                />
+              </div>
+              <span className="text-xs text-ink-soft whitespace-nowrap tabular-nums">
+                {totalDone} / {TOTAL_PRACTICES}
               </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 flex-wrap">
+            <FontScaleControl />
+            <button
+              type="button"
+              onClick={() => setRenameOpen(true)}
+              className="text-sm text-ink-soft hover:text-ink flex items-center gap-1.5"
+              title="修改顯示名稱"
+            >
+              <span aria-hidden>👋</span>
+              <span className="font-medium text-ink">{myLabel}</span>
+              <span aria-hidden className="text-ink-soft text-xs">✎</span>
+            </button>
+            <span className="text-coral text-xs whitespace-nowrap">
+              Zone {myZone}・{ZONES[myZone - 1].subtitle}
             </span>
             <button
               onClick={() => {
@@ -182,6 +232,14 @@ export default function MapClient() {
         open={rosterOpen}
         initialZone={rosterZone}
         onClose={() => setRosterOpen(false)}
+      />
+
+      <RenameDialog
+        open={renameOpen}
+        canonicalName={myName}
+        currentDisplayName={me?.display_name ?? null}
+        onClose={() => setRenameOpen(false)}
+        onSave={handleRename}
       />
 
       {/* Stress-mode banner */}

@@ -59,6 +59,7 @@ export function generateStressUsers(count: number, myName?: string | null): User
   if (myName) {
     users.push({
       name: myName,
+      display_name: null,
       current_zone: 1,
       lotus_in_zone: 1,
       completed_practices: ['0'],
@@ -80,6 +81,7 @@ export function generateStressUsers(count: number, myName?: string | null): User
 
     users.push({
       name,
+      display_name: null,
       current_zone: zone,
       lotus_in_zone: lotus,
       completed_practices: [],

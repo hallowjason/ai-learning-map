@@ -25,13 +25,20 @@ export const ZONE_PAIR_IMAGES: Record<'A' | 'B', string> = {
 };
 
 export type UserRow = {
-  name: string;
+  name: string;                     // canonical id (PK, set at first sign-in)
+  display_name: string | null;      // optional UI override; null → fall back to `name`
   current_zone: number;
   lotus_in_zone: number;
   completed_practices: string[];
   created_at: string;
   last_active: string;
 };
+
+/** Returns the label to render for a user — display_name if set, else canonical name. */
+export function getDisplayName(u: Pick<UserRow, 'name' | 'display_name'>): string {
+  const trimmed = u.display_name?.trim();
+  return trimmed && trimmed.length > 0 ? trimmed : u.name;
+}
 
 export type Database = {
   public: {

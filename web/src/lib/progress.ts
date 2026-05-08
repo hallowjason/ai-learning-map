@@ -83,6 +83,28 @@ export async function completePractice(name: string, practiceId: string): Promis
 }
 
 /**
+ * Update a user's display_name (the editable UI label, not the PK).
+ * Pass null/empty string to revert to the canonical name.
+ */
+export async function setDisplayName(name: string, newDisplayName: string | null): Promise<UserRow> {
+  const trimmed = newDisplayName?.trim() || null;
+  if (trimmed && trimmed.length > 20) {
+    throw new Error('顯示名稱最多 20 個字');
+  }
+  const { data, error } = await supabase
+    .from('users')
+    .update({
+      display_name: trimmed,
+      last_active: new Date().toISOString(),
+    })
+    .eq('name', name)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+/**
  * Subscribe to all user changes via Supabase Realtime.
  * Calls onUpdate every time a row is inserted/updated/deleted.
  */

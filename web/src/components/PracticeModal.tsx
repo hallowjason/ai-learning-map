@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import HoldToConfirm from "./HoldToConfirm";
 import type { Practice } from "@/lib/types";
 
 interface PracticeModalProps {
@@ -21,17 +22,22 @@ export default function PracticeModal({
   onClose,
   onComplete,
 }: PracticeModalProps) {
+  // Two-step completion: idle → confirming (with hold-to-confirm gate) → done.
+  const [confirming, setConfirming] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        if (confirming) setConfirming(false);
+        else onClose();
+      }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  }, [onClose, confirming]);
 
-  async function handleComplete() {
+  async function handleHoldConfirmed() {
     if (done || submitting) return;
     setSubmitting(true);
     try {
@@ -86,26 +92,57 @@ export default function PracticeModal({
 
         {!previewOnly && (
         <div
-          className="px-7 py-4 border-t flex items-center justify-between bg-cream"
+          className="px-7 py-4 border-t bg-cream"
           style={{ borderColor: "var(--color-border)" }}
         >
-          <p className="text-sm text-ink-soft">
-            {done ? "✓ 你已完成這個練習" : "完成後點下方按鈕，蓮花會綻放在你的名字旁"}
-          </p>
-          <button
-            onClick={handleComplete}
-            disabled={done || submitting}
-            className={`px-4 py-2 rounded-md font-normal text-base transition
-              ${done
-                ? "bg-cream text-ink-soft cursor-default"
-                : "bg-ink text-cream hover:opacity-90 active:opacity-80 btn-inset"
-              }
-              disabled:opacity-50
-            `}
-            style={done ? { border: "1px solid var(--color-border)" } : undefined}
-          >
-            {done ? "已完成 🪷" : submitting ? "記錄中…" : "我完成了 🪷"}
-          </button>
+          {done ? (
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-ink-soft">✓ 你已完成這個練習</p>
+              <span
+                className="px-4 py-2 rounded-md text-base bg-cream text-ink-soft border"
+                style={{ borderColor: "var(--color-border)" }}
+              >
+                已完成 🪷
+              </span>
+            </div>
+          ) : confirming ? (
+            <div className="flex flex-col gap-3">
+              <p className="text-sm text-ink">
+                確定要標記「<span className="font-semibold">{practice.title}</span>」為完成嗎？按住下方按鈕 3 秒確認。
+              </p>
+              <div className="flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setConfirming(false)}
+                  className="px-4 py-2 rounded-md border text-ink text-sm hover:border-ink/40 transition"
+                  style={{ borderColor: "var(--color-border)" }}
+                >
+                  取消
+                </button>
+                <HoldToConfirm
+                  onConfirm={handleHoldConfirmed}
+                  durationMs={3000}
+                  label="按住 3 秒確認完成 🪷"
+                  holdingLabel="繼續按住…"
+                  doneLabel="記錄中…"
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-ink-soft">
+                完成後點下方按鈕，蓮花會綻放在你的名字旁
+              </p>
+              <button
+                type="button"
+                onClick={() => setConfirming(true)}
+                disabled={submitting}
+                className="px-4 py-2 rounded-md font-normal text-base transition bg-ink text-cream hover:opacity-90 active:opacity-80 btn-inset disabled:opacity-50"
+              >
+                我完成了 🪷
+              </button>
+            </div>
+          )}
         </div>
         )}
       </div>

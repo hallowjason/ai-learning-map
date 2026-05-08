@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { ZONES } from "@/lib/zones";
-import type { UserRow, ZoneId } from "@/lib/types";
+import { getDisplayName, type UserRow, type ZoneId } from "@/lib/types";
 
 interface RosterPanelProps {
   users: UserRow[];
@@ -48,7 +48,10 @@ export default function RosterPanel({
   const grouped = useMemo(() => {
     const filtered = users.filter((u) => {
       if (zoneFilter && u.current_zone !== zoneFilter) return false;
-      if (query && !u.name.includes(query)) return false;
+      if (query) {
+        const label = getDisplayName(u);
+        if (!label.includes(query) && !u.name.includes(query)) return false;
+      }
       return true;
     });
     const byZone: Record<ZoneId, UserRow[]> = { 1: [], 2: [], 3: [], 4: [] };
@@ -56,12 +59,12 @@ export default function RosterPanel({
       const z = Math.min(4, Math.max(1, u.current_zone)) as ZoneId;
       byZone[z].push(u);
     }
-    // sort within each zone: me first, then alpha-stable
+    // sort within each zone: me first, then alpha-stable on display label
     for (const z of [1, 2, 3, 4] as ZoneId[]) {
       byZone[z].sort((a, b) => {
         if (a.name === myName) return -1;
         if (b.name === myName) return 1;
-        return a.name.localeCompare(b.name, "zh-Hant");
+        return getDisplayName(a).localeCompare(getDisplayName(b), "zh-Hant");
       });
     }
     return { filtered, byZone };
@@ -165,7 +168,7 @@ export default function RosterPanel({
                             u.name === myName ? "font-bold text-ink" : "text-ink"
                           }`}
                         >
-                          {u.name}
+                          {getDisplayName(u)}
                           {u.name === myName && (
                             <span className="ml-1.5 text-[10px] text-coral">（你）</span>
                           )}
